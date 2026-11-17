@@ -36,8 +36,14 @@
 #define ZDT_ADDR3           3
 #define ZDT_PULSE_PER_REV   3200        /* 16 细分下 3200 脉冲/圈 */
 
-/* 编码器: 定时器6 中断里采样 定时器1/3/8(编码器模式) */
-#define ENCODER_PPR         300.0f      /* 编码器线数, 默认 300 p/r */
+/* 编码器: 定时器6 中断里采样 定时器1/3/8(编码器模式)
+ * 输出轴一圈的计数 = 电机端线数 x 减速比 x 2
+ * (TI1 模式下 A 相上升沿和下降沿都计数, 所以是线数的 2 倍) */
+#define ENCODER1_CPR        (1024 * 2)              /* TIM1(PE9/PE11): 1024 p/r, 无减速比 -> 2048 计数/圈 */
+#define ENCODER2_CPR        (300 * 2)               /* TIM3(PA6/PA7)  : 300  p/r, 无减速比 -> 600  计数/圈 */
+#define ENCODER3_PPR        17                      /* TIM8(PC6/PC7)  : 电机端 17 p/r */
+#define ENCODER3_GEAR       51                      /* TIM8 减速比 51:1 */
+#define ENCODER3_CPR        (ENCODER3_PPR * ENCODER3_GEAR * 2)   /* 17*51*2 = 1734 计数/圈 */
 
 /* 屏幕预设重量(原版写死的数据) */
 #define WEIGHT_PRESET_NUM   3

@@ -134,13 +134,13 @@ void Stepper_Rotate(uint16_t angle, int32_t speed)
   Stepper_SetSpeed(speed);
 }
 
-/* 风机(继电器 1) + 水泵(继电器 2) */
+/* 水泵(PA15) + 风机(PC3) 一起开关 */
 void Pump_Control(uint8_t enable)
 {
   GPIO_PinState state = enable ? GPIO_PIN_SET : GPIO_PIN_RESET;
 
-  HAL_GPIO_WritePin(RELAY1_PORT, RELAY1_PIN, state);
-  HAL_GPIO_WritePin(RELAY2_PORT, RELAY2_PIN, state);
+  HAL_GPIO_WritePin(PUMP_PORT, PUMP_PIN, state);
+  HAL_GPIO_WritePin(FAN_PORT, FAN_PIN, state);
 }
 
 /* 直流电机 PWM 启动并全部停止 */
@@ -167,13 +167,20 @@ static void Motor_Init(void)
 /* 启动三个编码器定时器, 并让定时器6 定时中断来采样 */
 static void Encoder_Init(void)
 {
+  /* CubeMX 里这三个定时器的 Period 还是 PWM 用的小值(99/625/1250),
+   * 编码器模式下计数器会在这么小的范围里回绕, 增量就算错了, 这里统一改成 16 位满量程 */
+  __HAL_TIM_SET_AUTORELOAD(&htim1, 65535);
+  __HAL_TIM_SET_AUTORELOAD(&htim3, 65535);
+  __HAL_TIM_SET_AUTORELOAD(&htim8, 65535);
+
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);   /* 1 号编码器 */
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);   /* 2 号编码器 */
   HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_ALL);   /* 3 号编码器 */
 
-  __HAL_TIM_SET_COUNTER(&htim1, 0);
-  __HAL_TIM_SET_COUNTER(&htim3, 0);
-  __HAL_TIM_SET_COUNTER(&htim8, 0);
+  /* 清计数器, 并让新写入的 ARR 立即生效 */
+  htim1.Instance->EGR = TIM_EGR_UG;
+  htim3.Instance->EGR = TIM_EGR_UG;
+  htim8.Instance->EGR = TIM_EGR_UG;
 
   encoder_last1 = 0;
   encoder_last2 = 0;
@@ -197,12 +204,12 @@ static void Encoder_Update(void)
   encoder_last2 = now;
 
   now = (uint16_t)__HAL_TIM_GET_COUNTER(&htim8);
-  encoder3 += (int16_t)(now - encoder_last3);
+  encoder3 -= (int16_t)(now - encoder_last3);   /* 3 号编码器方向取反 */
   encoder_last3 = now;
 
-  angle1 = encoder1 * 360.0f / ENCODER_PPR;
-  angle2 = encoder2 * 360.0f / ENCODER_PPR;
-  angle3 = encoder3 * 360.0f / ENCODER_PPR;
+  angle1 = encoder1 * 360.0f / ENCODER1_CPR;
+  angle2 = encoder2 * 360.0f / ENCODER2_CPR;
+  angle3 = encoder3 * 360.0f / ENCODER3_CPR;
 }
 
 /* 定时器更新回调: 定时器6 采编码器, 脉冲步进定时器数脉冲 */
@@ -265,7 +272,6 @@ static void Motor_Stop_All(void)
 
   HAL_GPIO_WritePin(OUT_AUX1_PORT, OUT_AUX1_PIN, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(OUT_AUX2_PORT, OUT_AUX2_PIN, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(RELAY4_PORT, RELAY4_PIN, GPIO_PIN_RESET);
   Pump_Control(0);
 
   Emm_V5_Stop_Now(ZDT_ADDR2, false);
@@ -332,7 +338,7 @@ void Task_Uart1(void)
     {
       ext_state = EXT_IDLE;
       Motor_Control(Motor1, Motor_STOP, 0);
-      HAL_GPIO_WritePin(RELAY4_PORT, RELAY4_PIN, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(FAN_PORT, FAN_PIN, GPIO_PIN_RESET);
       ext_loop_mode  = 0;
       dc1_time_index = 0;
       ext_num        = 0;
@@ -354,20 +360,20 @@ void Task_Uart1(void)
       HAL_GPIO_WritePin(OUT_AUX2_PORT, OUT_AUX2_PIN, GPIO_PIN_RESET);
     }
   }
-  /* 工位 2: 直流电机 3 + 风机水泵 */
+  /* 工位 2: 直流电机 3 + 水泵 + 吹风 */
   else if ((p = strstr((char *)uart_rx_buf, "#PART2:")) != NULL)
   {
     if (atoi(p + 7) == 1)
     {
       Motor_Control(Motor3, Motor_FORWARD, motor_speeds[Motor3]);
-      HAL_GPIO_WritePin(RELAY1_PORT, RELAY1_PIN, GPIO_PIN_SET);
-      HAL_GPIO_WritePin(RELAY2_PORT, RELAY2_PIN, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(PUMP_PORT, PUMP_PIN, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(FAN_PORT, FAN_PIN, GPIO_PIN_SET);
     }
     else if (atoi(p + 7) == 0)
     {
       Motor_Control(Motor3, Motor_STOP, 0);
-      HAL_GPIO_WritePin(RELAY1_PORT, RELAY1_PIN, GPIO_PIN_RESET);
-      HAL_GPIO_WritePin(RELAY2_PORT, RELAY2_PIN, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(PUMP_PORT, PUMP_PIN, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(FAN_PORT, FAN_PIN, GPIO_PIN_RESET);
     }
   }
   /* 设置直流电机速度: #MOTOR:id,speed */

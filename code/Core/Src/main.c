@@ -104,11 +104,8 @@ int main(void)
   MX_UART4_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-
-  INIT_ALL();
-
+	INIT_ALL();
   tick = HAL_GetTick();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
