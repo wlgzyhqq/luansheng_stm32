@@ -57,6 +57,61 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/* Watch: net grams, INT32_MIN until the first sample. */
+volatile int32_t hx711_weight_g = INT32_MIN;
+static int32_t hx711_tare;
+static uint8_t hx711_has_tare;
+
+static void HX711_Init(void)
+{
+  GPIO_InitTypeDef pin = {0};
+
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+  pin.Pin = GPIO_PIN_11;
+  pin.Mode = GPIO_MODE_OUTPUT_PP;
+  pin.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &pin);
+
+  pin.Pin = GPIO_PIN_1;
+  pin.Mode = GPIO_MODE_INPUT;
+  pin.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOC, &pin);
+}
+
+static void HX711_Update(void)
+{
+  uint32_t bits = 0;
+  uint32_t irq_state;
+  int32_t sample;
+  uint8_t i;
+
+  if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) != GPIO_PIN_RESET)
+    return;
+
+  /* Keep interruptions from extending SCK high into power-down. */
+  irq_state = __get_PRIMASK();
+  __disable_irq();
+  for (i = 0; i < 25; ++i)
+  {
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_SET);
+    if (i < 24)
+      bits = (bits << 1) | (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+  }
+  __set_PRIMASK(irq_state);
+
+  sample = (int32_t)(bits ^ 0x800000u) - 0x800000;
+  if (!hx711_has_tare)
+  {
+    hx711_tare = sample;
+    hx711_has_tare = 1;
+  }
+
+  /* Counts per gram from the earlier project; recalibrate for this scale. */
+  hx711_weight_g = (int32_t)((sample - hx711_tare) / 429.5f);
+}
 
 /* USER CODE END 0 */
 
@@ -104,6 +159,7 @@ int main(void)
   MX_UART4_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
+  HX711_Init();
 	INIT_ALL();
   tick = HAL_GetTick();
   /* USER CODE END 2 */
@@ -119,6 +175,7 @@ int main(void)
     Task_Uart1();
     Task_Process();
 
+    HX711_Update();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
