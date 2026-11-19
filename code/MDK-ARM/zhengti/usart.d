@@ -1,6 +1,5 @@
 zhengti\usart.o: ../Core/Src/usart.c
-zhengti\usart.o: ../Core/Inc/usart.h
-zhengti\usart.o: ../Core/Inc/main.h
+zhengti\usart.o: ../Core/Inc/pt100_uart.h
 zhengti\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 zhengti\usart.o: ../Core/Inc/stm32f1xx_hal_conf.h
 zhengti\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -29,6 +28,8 @@ zhengti\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 zhengti\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 zhengti\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 zhengti\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+zhengti\usart.o: ../Core/Inc/usart.h
+zhengti\usart.o: ../Core/Inc/main.h
 zhengti\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 zhengti\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 zhengti\usart.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

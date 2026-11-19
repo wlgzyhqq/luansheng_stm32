@@ -414,6 +414,16 @@
               <FilePath>../Core/Inc/task.h</FilePath>
             </File>
             <File>
+              <FileName>pt100_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Core/Src/pt100_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>pt100_uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../Core/Inc/pt100_uart.h</FilePath>
+            </File>
+            <File>
               <FileName>zdt.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/zdt.c</FilePath>

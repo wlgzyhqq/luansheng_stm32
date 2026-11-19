@@ -1,3 +1,4 @@
+#include "pt100_uart.h"
 #include "task.h"
 #include "value.h"
 #include "zdt.h"
@@ -288,6 +289,7 @@ static void Motor_Stop_All(void)
 }
 
 /* 串口 1 命令解析 */
+
 static void Print_250g_Label(void)
 {
   /* MC-EH201: 384 x 250 dots, 2x weight, GB2312 school name. */
@@ -522,6 +524,7 @@ frame_reset:
 
 void Task_Process(void)
 {
+  PT100_Process();
   Process_OneKey();
   Process_Step2();
   Process_Step3();

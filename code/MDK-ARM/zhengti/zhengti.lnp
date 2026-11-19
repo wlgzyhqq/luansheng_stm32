@@ -2,6 +2,7 @@
 "zhengti\startup_stm32f103xe.o"
 "zhengti\value.o"
 "zhengti\task.o"
+"zhengti\pt100_uart.o"
 "zhengti\zdt.o"
 "zhengti\main.o"
 "zhengti\gpio.o"

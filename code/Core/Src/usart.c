@@ -1,3 +1,4 @@
+#include "pt100_uart.h"
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -42,7 +43,7 @@ void MX_UART4_Init(void)
 
   /* USER CODE END UART4_Init 1 */
   huart4.Instance = UART4;
-  huart4.Init.BaudRate = 115200;
+  huart4.Init.BaudRate = PT100_BAUD_RATE;
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
@@ -54,6 +55,7 @@ void MX_UART4_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN UART4_Init 2 */
+  PT100_Init();
 
   /* USER CODE END UART4_Init 2 */
 

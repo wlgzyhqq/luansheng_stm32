@@ -1,6 +1,5 @@
 zhengti\task.o: ../Core/Src/task.c
-zhengti\task.o: ../Core/Inc/task.h
-zhengti\task.o: ../Core/Inc/main.h
+zhengti\task.o: ../Core/Inc/pt100_uart.h
 zhengti\task.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 zhengti\task.o: ../Core/Inc/stm32f1xx_hal_conf.h
 zhengti\task.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -29,6 +28,8 @@ zhengti\task.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 zhengti\task.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 zhengti\task.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 zhengti\task.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+zhengti\task.o: ../Core/Inc/task.h
+zhengti\task.o: ../Core/Inc/main.h
 zhengti\task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 zhengti\task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 zhengti\task.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
